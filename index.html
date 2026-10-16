@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pseudocode Lab — Susun Instruksi, Jalankan Aksi!</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%);
+    min-height: 100vh; padding: 16px; color: #1e293b;
+  }
+  .hidden { display: none !important; }
+
+  /* ============ LOGIN ============ */
+  .login-wrap { max-width: 420px; margin: 40px auto 0; }
+  .login-card {
+    background: #fff; border-radius: 16px; padding: 28px 24px;
+    box-shadow: 0 10px 40px rgba(30,64,175,0.15); margin-bottom: 16px;
+  }
+  .login-logo { text-align: center; margin-bottom: 20px; }
+  .login-logo h1 { font-size: 24px; color: #1e40af; margin-bottom: 4px; }
+  .login-logo p { font-size: 12px; color: #64748b; }
+  .tab {
+    display: flex; background: #f1f5f9; border-radius: 10px;
+    padding: 4px; margin-bottom: 20px;
+  }
+  .tab button {
+    flex: 1; padding: 10px; border: none; background: transparent;
+    font-size: 13px; font-weight: 700; color: #64748b;
+    cursor: pointer; border-radius: 8px; transition: all 0.2s;
+  }
+  .tab button.active {
+    background: #fff; color: #1e40af;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+  }
+  .form-group { margin-bottom: 14px; }
+  .form-group label {
+    display: block; font-size: 12px; font-weight: 600;
+    color: #475569; margin-bottom: 6px;
+  }
+  .form-group input {
+    width: 100%; padding: 11px 14px; border: 2px solid #e2e8f0;
+    border-radius: 8px; font-size: 14px; font-family: inherit;
+    transition: border 0.2s;
+  }
+  .form-group input:focus { outline: none; border-color: #1e40af; }
+  .btn-primary {
+    width: 100%; padding: 12px; background: #1e40af; color: #fff;
+    border: none; border-radius: 8px; font-size: 14px;
+    font-weight: 700; cursor: pointer; margin-top: 6px;
+  }
+  .btn-primary:hover { background: #1e3a8a; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .error {
+    background: #fee2e2; color: #991b1b; padding: 10px;
+    border-radius: 8px; font-size: 12px; font-weight: 600;
+    margin-bottom: 14px; display: none;
+  }
+  .error.show { display: block; }
+  .info {
+    background: #dbeafe; color: #1e40af; padding: 10px;
+    border-radius: 8px; font-size: 12px; margin-bottom: 14px; line-height: 1.5;
+  }
+  .footer {
+    text-align: center; font-size: 11px; color: #94a3b8; margin-top: 16px;
+  }
+
+  /* ============ GAME ============ */
+  header { text-align: center; margin-bottom: 16px; }
+  h1 { font-size: 22px; color: #1e40af; }
+  .subtitle { font-size: 13px; color: #64748b; margin-top: 4px; }
+
+  .levels {
+    display: flex; justify-content: center; gap: 8px;
+    margin: 12px 0 16px; flex-wrap: wrap;
+  }
+  .level-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 3px solid #cbd5e1; background: #fff;
+    font-size: 16px; font-weight: 700; color: #94a3b8;
+    cursor: not-allowed; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .level-btn.active {
+    border-color: #1e40af; background: #dbeafe;
+    color: #1e40af; cursor: pointer; transform: scale(1.1);
+  }
+  .level-btn.completed {
+    border-color: #10b981; background: #10b981;
+    color: #fff; cursor: pointer;
+  }
+  .level-btn.completed::after {
+    content: '✓'; position: absolute; bottom: -4px; right: -4px;
+    background: #fff; color: #10b981; border-radius: 50%;
+    width: 16px; height: 16px; display: flex;
+    align-items: center; justify-content: center;
+    font-weight: 900; font-size: 11px; border: 2px solid #10b981;
+  }
+  .level-btn.locked { opacity: 0.5; }
+
+  .container {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1.2fr; gap: 16px;
+  }
+  @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
+  .panel {
+    background: #fff; border-radius: 12px; padding: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid #e2e8f0;
+  }
+  .panel-title {
+    font-size: 14px; font-weight: 700; color: #1e40af;
+    margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+  }
+  .blocks { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+  .block-btn {
+    padding: 8px 12px; border: none; border-radius: 8px;
+    font-size: 13px; font-weight: 600; color: #fff;
+    cursor: pointer; text-align: left; transition: transform 0.15s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .block-btn:hover { transform: translateX(3px); }
+  .block-btn:active { transform: scale(0.97); }
+  .b-mulai    { background: #10b981; }
+  .b-maju1    { background: #3b82f6; }
+  .b-maju2    { background: #2563eb; }
+  .b-maju3    { background: #1d4ed8; }
+  .b-mundur   { background: #8b5cf6; }
+  .b-kiri     { background: #f59e0b; }
+  .b-kanan    { background: #f97316; }
+  .b-ambil    { background: #ec4899; }
+  .b-selesai  { background: #ef4444; }
+
+  .workspace {
+    min-height: 180px; border: 2px dashed #cbd5e1;
+    border-radius: 8px; padding: 8px; background: #f8fafc;
+    margin-bottom: 10px;
+  }
+  .workspace:empty::before {
+    content: "Klik blok di kiri untuk menambah instruksi…";
+    color: #94a3b8; font-size: 12px; font-style: italic;
+  }
+  .item {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 8px; border-radius: 6px; margin-bottom: 4px;
+    font-size: 12px; font-weight: 600; color: #fff;
+    cursor: grab; user-select: none; transition: all 0.3s;
+    position: relative;
+  }
+  .item.dragging { opacity: 0.5; }
+  .item.drag-over { border-top: 2px solid #1e40af; }
+  .item.running {
+    outline: 3px solid #facc15; outline-offset: 2px;
+    transform: translateX(6px);
+  }
+  .item.error {
+    background: #dc2626 !important;
+    outline: 3px solid #fca5a5; outline-offset: 2px;
+    animation: shake 0.5s ease;
+    box-shadow: 0 0 16px rgba(220,38,38,0.6);
+  }
+  .item.error::after {
+    content: '❌ SALAH DI SINI';
+    position: absolute; right: -8px; top: -10px;
+    background: #dc2626; color: #fff;
+    font-size: 9px; font-weight: 900;
+    padding: 2px 6px; border-radius: 4px;
+    letter-spacing: 0.5px; white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(6px); }
+    20% { transform: translateX(-4px); }
+    40% { transform: translateX(10px); }
+    60% { transform: translateX(-2px); }
+    80% { transform: translateX(8px); }
+  }
+  .item.passed { opacity: 0.5; background: #10b981 !important; }
+
+  .item .num {
+    background: rgba(255,255,255,0.3); border-radius: 4px;
+    padding: 1px 6px; font-size: 11px;
+  }
+  .item .actions { margin-left: auto; display: flex; gap: 4px; }
+  .item .actions button {
+    background: rgba(255,255,255,0.25); border: none;
+    color: #fff; border-radius: 4px; width: 20px; height: 20px;
+    font-size: 11px; cursor: pointer; line-height: 1;
+  }
+  .item .actions button:hover { background: rgba(255,255,255,0.5); }
+
+  .controls { display: flex; gap: 6px; flex-wrap: wrap; }
+  .ctrl {
+    padding: 8px 14px; border: none; border-radius: 8px;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .ctrl:disabled { opacity: 0.4; cursor: not-allowed; }
+  .ctrl-run   { background: #10b981; color: #fff; }
+  .ctrl-reset { background: #ef4444; color: #fff; }
+  .ctrl-clear { background: #64748b; color: #fff; }
+
+  .arena {
+    display: grid; gap: 3px; aspect-ratio: 1;
+    background: #e2e8f0; padding: 6px; border-radius: 10px;
+    margin-bottom: 10px;
+  }
+  .cell {
+    background: #fff; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; position: relative; transition: background 0.2s;
+  }
+  .cell.wall   { background: #475569; }
+  .cell.goal   { background: #fef3c7; }
+  .cell.item   { background: #fce7f3; }
+  .cell.robot  { background: #dbeafe; }
+  .cell.current { box-shadow: inset 0 0 0 3px #facc15; }
+  .cell.crash   { box-shadow: inset 0 0 0 3px #dc2626; background: #fee2e2; }
+
+  .status {
+    padding: 10px; border-radius: 8px; font-size: 13px;
+    font-weight: 600; text-align: center; margin-top: 8px;
+  }
+  .status.idle    { background: #f1f5f9; color: #64748b; }
+  .status.running { background: #dbeafe; color: #1e40af; }
+  .status.success { background: #d1fae5; color: #065f46; }
+  .status.fail    { background: #fee2e2; color: #991b1b; }
+
+  .pseudo {
+    background: #1e293b; color: #e2e8f0; padding: 10px;
+    border-radius: 8px; font-family: 'Courier New', monospace;
+    font-size: 12px; line-height: 1.6;
+    max-height: 140px; overflow-y: auto; white-space: pre-wrap;
+  }
+
+  .hint { font-size: 11px; color: #64748b; margin-top: 6px; line-height: 1.5; }
+
+  .mission {
+    background: #fffbeb; border-left: 4px solid #f59e0b;
+    padding: 10px 12px; border-radius: 6px;
+    font-size: 12px; margin-bottom: 10px; line-height: 1.6;
+  }
+  .mission h4 { color: #b45309; margin-bottom: 6px; font-size: 13px; }
+  .mission .row {
+    display: flex; gap: 6px; margin-bottom: 4px; align-items: flex-start;
+  }
+  .mission .row strong { min-width: 90px; color: #92400e; }
+
+  .stats { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .stat-card {
+    flex: 1; min-width: 80px; background: #f1f5f9;
+    border-radius: 8px; padding: 8px; text-align: center;
+  }
+  .stat-card .label {
+    font-size: 10px; color: #64748b;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .stat-card .value {
+    font-size: 20px; font-weight: 800; color: #1e40af; margin-top: 2px;
+  }
+  .stat-card.success .value { color: #10b981; }
+
+  .modal-bg {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5); align-items: center;
+    justify-content: center; z-index: 100; padding: 16px;
+  }
+  .modal-bg.show { display: flex; }
+  .modal {
+    background: #fff; padding: 24px; border-radius: 16px;
+    text-align: center; max-width: 400px; width: 100%;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    animation: pop 0.3s ease; max-height: 90vh; overflow-y: auto;
+  }
+  @keyframes pop {
+    0% { transform: scale(0.7); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .modal h2 { color: #10b981; margin-bottom: 8px; font-size: 22px; }
+  .modal p { color: #64748b; margin-bottom: 12px; font-size: 13px; }
+  .modal .big-score {
+    font-size: 48px; font-weight: 900; color: #1e40af; margin: 8px 0;
+  }
+  .modal .score-detail {
+    background: #f1f5f9; border-radius: 8px;
+    padding: 10px; margin: 12px 0; font-size: 12px;
+    color: #475569; text-align: left; line-height: 1.6;
+  }
+  .modal button {
+    padding: 10px 20px; border: none; border-radius: 8px;
+    background: #1e40af; color: #fff; font-weight: 700;
+    cursor: pointer; font-size: 13px; margin-top: 8px;
+  }
+  .modal button:hover { background: #1e3a8a; }
+
+  .score-table {
+    width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12px;
+  }
+  .score-table th, .score-table td {
+    padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: left;
+  }
+  .score-table th {
+    background: #f1f5f9; color: #1e40af; font-weight: 700;
+  }
+  .score-table tr.total {
+    background: #dbeafe; font-weight: 800; font-size: 14px;
+  }
+
+  .legend {
+    display: flex; gap: 10px; font-size: 10px;
+    color: #64748b; margin-top: 8px; flex-wrap: wrap;
+  }
+  .legend span { display: flex; align-items: center; gap: 4px; }
+  .legend .dot {
+    width: 10px; height: 10px; border-radius: 50%; display: inline-block;
+  }
+  .legend .dot-yellow { background: #facc15; }
+  .legend .dot-red { background: #dc2626; }
+  .legend .dot-green { background: #10b981; }
+
+  /* ============ DASHBOARD GURU ============ */
+  .dash-container { max-width: 1200px; margin: 0 auto; }
+  .dash-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px; flex-wrap: wrap; gap: 10px;
+  }
+  .dash-header h1 { font-size: 22px; color: #1e40af; }
+  .dash-header .user-info {
+    font-size: 13px; color: #64748b;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .btn-logout {
+    background: #ef4444; color: #fff; border: none;
+    padding: 8px 14px; border-radius: 8px; font-size: 12px;
+    font-weight: 700; cursor: pointer;
+  }
+  .dash-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px; margin-bottom: 20px;
+  }
+  .dash-stat {
+    background: #fff; border-radius: 12px; padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid #e2e8f0; text-align: center;
+  }
+  .dash-stat .label {
+    font-size: 11px; color: #64748b;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .dash-stat .value {
+    font-size: 26px; font-weight: 800; color: #1e40af;
+  }
+  .dash-panel {
+    background: #fff; border-radius: 12px; padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid #e2e8f0; margin-bottom: 16px;
+  }
+  .dash-panel-title {
+    font-size: 15px; font-weight: 700; color: #1e40af;
+    margin-bottom: 12px; display: flex; justify-content: space-between;
+    align-items: center; flex-wrap: wrap; gap: 8px;
+  }
+  .btn-refresh {
+    background: #10b981; color: #fff; border: none;
+    padding: 6px 12px; border-radius: 6px; font-size: 12px;
+    font-weight: 700; cursor: pointer;
+  }
+  .table-wrap { overflow-x: auto; }
+  .dash-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .dash-table th, .dash-table td {
+    padding: 10px 8px; text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .dash-table th {
+    background: #f1f5f9; color: #1e40af;
+    font-weight: 700; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.3px;
+  }
+  .dash-table tbody tr:hover { background: #f8fafc; }
+  .badge {
+    display: inline-block; padding: 2px 8px;
+    border-radius: 20px; font-size: 11px; font-weight: 700;
+  }
+  .badge-success { background: #d1fae5; color: #065f46; }
+  .badge-warn { background: #fef3c7; color: #92400e; }
+  .badge-fail { background: #fee2e2; color: #991b1b; }
+  .empty {
+    text-align: center; padding: 40px 20px; color: #94a3b8; font-size: 13px;
+  }
+  .loading { text-align: center; padding: 40px; color: #64748b; }
+  .spinner {
+    display: inline-block; width: 24px; height: 24px;
+    border: 3px solid #e2e8f0; border-top-color: #1e40af;
+    border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .search-input {
+    padding: 8px 12px; border: 2px solid #e2e8f0;
+    border-radius: 8px; font-size: 13px; font-family: inherit;
+    min-width: 200px;
+  }
+  .search-input:focus { outline: none; border-color: #1e40af; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="pageLogin" class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">
+      <h1>🧩 Pseudocode Lab</h1>
+      <p>Susun Instruksi, Jalankan Aksi!</p>
+    </div>
+
+    <div class="tab">
+      <button id="tabSiswa" class="active" onclick="switchTab('siswa')">👨‍🎓 Siswa</button>
+      <button id="tabGuru" onclick="switchTab('guru')">👩‍🏫 Guru</button>
+    </div>
+
+    <div class="error" id="errorBox"></div>
+
+    <div id="formSiswa">
+      <div class="info">💡 Isi <strong>nama lengkap</strong> dan <strong>kelas</strong> kamu.</div>
+      <div class="form-group">
+        <label>Nama Lengkap</label>
+        <input type="text" id="namaSiswa" placeholder="Contoh: Ahmad Fauzi" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Kelas</label>
+        <input type="text" id="kelasSiswa" placeholder="Contoh: 7A" autocomplete="off">
+      </div>
+      <button class="btn-primary" id="btnLoginSiswa" onclick="loginSiswa()">
+        Mulai Belajar →
+      </button>
+    </div>
+
+    <div id="formGuru" style="display:none;">
+      <div class="info">🔐 Masukkan password guru untuk membuka dashboard.</div>
+      <div class="form-group">
+        <label>Password Guru</label>
+        <input type="password" id="passwordGuru" placeholder="Password" autocomplete="off">
+      </div>
+      <button class="btn-primary" id="btnLoginGuru" onclick="loginGuru()">
+        Masuk Dashboard Guru →
+      </button>
+    </div>
+  </div>
+
+  <div class="footer">
+    Media Pembelajaran Koding Kelas VII<br>
+    Dikembangkan untuk pembelajaran bersama Zulfa Dianti, S.Pd., M.Pd., Gr.
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="pageGame" class="hidden">
+  <header>
+    <h1>🧩 Pseudocode Lab</h1>
+    <p class="subtitle" id="gameSubtitle">Susun Instruksi, Jalankan Aksi! — Media Pembelajaran Koding Kelas VII</p>
+  </header>
+
+  <div class="levels" id="levelBar"></div>
+
+  <div class="container">
+    <div class="panel">
+      <div class="panel-title">📦 Panel Instruksi</div>
+      <div class="mission" id="missionBox">
+        <h4 id="missionTitle">🎯 Misi Level 1</h4>
+        <div class="row"><strong>🎯 Tujuan:</strong><span id="missionGoal">-</span></div>
+        <div class="row"><strong>✅ Wajib:</strong><span id="missionDo">-</span></div>
+        <div class="row"><strong>❌ Hindari:</strong><span id="missionAvoid">-</span></div>
+      </div>
+      <div class="blocks" id="blockList"></div>
+      <div class="panel-title" style="margin-top:14px;">📝 Pseudocode</div>
+      <div class="pseudo" id="pseudoPreview">(belum ada instruksi)</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">🛠️ Area Penyusunan <span id="levelLabel" style="margin-left:auto;font-size:12px;color:#64748b;">Level 1</span></div>
+
+      <div class="stats">
+        <div class="stat-card">
+          <div class="label">Percobaan</div>
+          <div class="value" id="statAttempts">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Poin Level</div>
+          <div class="value" id="statPoints">–</div>
+        </div>
+        <div class="stat-card success">
+          <div class="label">Total Poin</div>
+          <div class="value" id="statTotal">0</div>
+        </div>
+      </div>
+
+      <div class="workspace" id="workspace"></div>
+
+      <div class="controls">
+        <button class="ctrl ctrl-run"   id="btnRun">▶️ Jalankan</button>
+        <button class="ctrl ctrl-clear" id="btnClear">🗑️ Kosongkan</button>
+        <button class="ctrl ctrl-reset" id="btnReset">🔄 Reset</button>
+      </div>
+
+      <div class="legend">
+        <span><span class="dot dot-yellow"></span> Sedang dijalankan</span>
+        <span><span class="dot dot-red"></span> Salah / error</span>
+        <span><span class="dot dot-green"></span> Sudah dilewati</span>
+      </div>
+
+      <div class="panel-title" style="margin-top:14px;">🗺️ Arena Simulasi</div>
+      <div class="arena" id="arena"></div>
+
+      <div class="status idle" id="status">Siap. Susun instruksi lalu tekan Jalankan.</div>
+
+      <div class="hint">
+        💡 <strong>Tips:</strong> Klik blok di kiri untuk menambah. Gunakan tombol ▲▼ untuk atur urutan, ✕ untuk hapus.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD GURU -->
+<div id="pageGuru" class="dash-container hidden">
+  <div class="dash-header">
+    <h1>📊 Dashboard Guru — Pseudocode Lab</h1>
+    <div class="user-info">
+      <span>👩‍🏫 Guru Koding</span>
+      <button class="btn-logout" onclick="logout()">Keluar</button>
+    </div>
+  </div>
+
+  <div class="dash-stats">
+    <div class="dash-stat">
+      <div class="label">Total Siswa</div>
+      <div class="value" id="statSiswa">–</div>
+    </div>
+    <div class="dash-stat">
+      <div class="label">Rata-rata Nilai</div>
+      <div class="value" id="statRata">–</div>
+    </div>
+    <div class="dash-stat">
+      <div class="label">Nilai Tertinggi</div>
+      <div class="value" id="statMax">–</div>
+    </div>
+    <div class="dash-stat">
+      <div class="label">Nilai Terendah</div>
+      <div class="value" id="statMin">–</div>
+    </div>
+  </div>
+
+  <div class="dash-panel">
+    <div class="dash-panel-title">
+      <span>📋 Daftar Nilai Siswa</span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <input type="text" class="search-input" id="searchInput" placeholder="🔍 Cari nama…" oninput="filterTable()">
+        <button class="btn-refresh" onclick="loadDataGuru()">🔄 Refresh</button>
+      </div>
+    </div>
+    <div id="tableArea">
+      <div class="loading">
+        <div class="spinner"></div>
+        <div>Memuat data…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<script>
+/* ============================================================
+   ⚙️ KONFIGURASI — URL BARU
+   ============================================================ */
+const API_URL = 'https://script.google.com/macros/s/AKfycbyLHPvhD1HzA390jt6hqQvW4I7sNrZJLrmM8jVKyDaMJB6_HRi5xuxwqBzIDl4rRiTCOg/exec';
+
+/* ============================================================
+   NAVIGASI
+   ============================================================ */
+function showPage(page) {
+  document.getElementById('pageLogin').classList.add('hidden');
+  document.getElementById('pageGame').classList.add('hidden');
+  document.getElementById('pageGuru').classList.add('hidden');
+
+  if (page === 'login') document.getElementById('pageLogin').classList.remove('hidden');
+  if (page === 'game')  document.getElementById('pageGame').classList.remove('hidden');
+  if (page === 'guru')  document.getElementById('pageGuru').classList.remove('hidden');
+}
+
+/* ============================================================
+   LOGIN
+   ============================================================ */
+let SISWA = null;
+
+function switchTab(tab) {
+  document.getElementById('errorBox').classList.remove('show');
+  if (tab === 'siswa') {
+    document.getElementById('tabSiswa').classList.add('active');
+    document.getElementById('tabGuru').classList.remove('active');
+    document.getElementById('formSiswa').style.display = 'block';
+    document.getElementById('formGuru').style.display = 'none';
+  } else {
+    document.getElementById('tabGuru').classList.add('active');
+    document.getElementById('tabSiswa').classList.remove('active');
+    document.getElementById('formSiswa').style.display = 'none';
+    document.getElementById('formGuru').style.display = 'block';
+  }
+}
+
+function showError(msg) {
+  const box = document.getElementById('errorBox');
+  box.textContent = '❌ ' + msg;
+  box.classList.add('show');
+}
+
+function loginSiswa() {
+  const nama = document.getElementById('namaSiswa').value.trim();
+  const kelas = document.getElementById('kelasSiswa').value.trim();
+  if (!nama || !kelas) { showError('Isi nama dan kelas dulu ya.'); return; }
+  if (nama.length < 2) { showError('Nama terlalu pendek.'); return; }
+
+  SISWA = { nama, kelas };
+  sessionStorage.setItem('siswa', JSON.stringify(SISWA));
+  sessionStorage.setItem('role', 'siswa');
+
+  const sub = document.getElementById('gameSubtitle');
+  sub.innerHTML = '👋 Halo, <strong>' + SISWA.nama + '</strong> (' + SISWA.kelas + ') — Susun Instruksi, Jalankan Aksi!';
+
+  showPage('game');
+  initGame();
+}
+
+async function loginGuru() {
+  const password = document.getElementById('passwordGuru').value.trim();
+  if (!password) { showError('Isi password dulu ya.'); return; }
+
+  const btn = document.getElementById('btnLoginGuru');
+  btn.disabled = true;
+  btn.textContent = '⏳ Memeriksa…';
+
+  try {
+    const url = API_URL + '?action=loginGuru&password=' + encodeURIComponent(password);
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.ok) {
+      sessionStorage.setItem('guru', JSON.stringify(data.guru || { nama: 'Guru' }));
+      sessionStorage.setItem('role', 'guru');
+      showPage('guru');
+      loadDataGuru();
+    } else {
+      showError(data.msg || 'Password salah');
+    }
+  } catch (err) {
+    showError('Koneksi gagal. Periksa internet. (' + err.message + ')');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Masuk Dashboard Guru →';
+  }
+}
+
+function logout() {
+  if (!confirm('Yakin mau keluar?')) return;
+  sessionStorage.removeItem('siswa');
+  sessionStorage.removeItem('guru');
+  sessionStorage.removeItem('role');
+  location.reload();
+}
+
+document.getElementById('kelasSiswa').addEventListener('keypress', e => {
+  if (e.key === 'Enter') loginSiswa();
+});
+document.getElementById('passwordGuru').addEventListener('keypress', e => {
+  if (e.key === 'Enter') loginGuru();
+});
+
+/* ============================================================
+   DATA 5 LEVEL
+   ============================================================ */
+const LEVELS = [
+  { name: 'Level 1 — Dasar', goal: 'Antar robot 🤖 ke bendera 🚩.',
+    do: 'Lewati jalur aman dari start ke bendera.',
+    avoid: 'Jangan menabrak dinding ⬛ atau keluar arena.',
+    rows: 6, cols: 6,
+    arena: [
+      [0,0,0,0,0,0],[0,1,1,0,0,0],[0,0,0,0,1,0],
+      [0,1,0,0,0,0],[0,0,0,1,0,0],[0,0,0,0,0,2]
+    ],
+    start: { r: 0, c: 0, dir: 'kanan' } },
+  { name: 'Level 2 — Ambil Benda', goal: 'Ambil benda 📦, lalu ke bendera 🚩.',
+    do: 'Ambil kotak 📦 di tengah dengan AMBIL BENDA, baru ke bendera.',
+    avoid: 'Jangan menabrak dinding, jangan ke bendera sebelum ambil benda.',
+    rows: 6, cols: 6,
+    arena: [
+      [0,0,0,0,0,0],[0,1,1,1,0,0],[0,0,3,0,0,0],
+      [0,1,0,1,0,0],[0,0,0,0,1,0],[0,0,0,0,0,2]
+    ],
+    start: { r: 0, c: 0, dir: 'kanan' } },
+  { name: 'Level 3 — Labirin', goal: 'Lewati labirin, ambil 📦, capai 🚩.',
+    do: 'Telusuri lorong, ambil kotak, cari jalan ke bendera.',
+    avoid: 'Jangan menabrak dinding atau terjebak di lorong buntu.',
+    rows: 7, cols: 7,
+    arena: [
+      [0,0,0,0,0,0,0],[0,1,1,0,1,1,0],[0,0,0,0,0,1,0],
+      [0,1,0,1,0,1,0],[0,0,0,1,3,0,0],[0,1,0,0,0,1,0],
+      [0,0,0,1,0,0,2]
+    ],
+    start: { r: 0, c: 0, dir: 'kanan' } },
+  { name: 'Level 4 — Ambil 2 Benda', goal: 'Ambil 2 benda 📦📦, lalu capai 🚩.',
+    do: 'Ambil KEDUA kotak, baru menuju bendera.',
+    avoid: 'Jangan menabrak dinding, jangan lupa ambil salah satu kotak.',
+    rows: 7, cols: 7,
+    arena: [
+      [0,0,0,0,0,0,0],[0,3,1,1,0,3,0],[0,0,0,1,0,0,0],
+      [0,1,0,0,0,1,0],[0,0,0,1,0,0,0],[0,1,1,0,0,1,0],
+      [0,0,0,0,0,0,2]
+    ],
+    start: { r: 0, c: 0, dir: 'kanan' } },
+  { name: 'Level 5 — Tantangan', goal: 'Ambil 2 📦, hindari dinding, capai 🚩!',
+    do: 'Ambil kedua kotak, lalu capai bendera di kanan bawah.',
+    avoid: 'Jangan menabrak dinding, jangan keluar arena.',
+    rows: 8, cols: 8,
+    arena: [
+      [0,0,0,0,0,0,0,0],[0,1,1,0,1,1,0,0],[0,0,0,0,0,1,0,3],
+      [0,1,0,1,0,1,0,0],[0,0,3,1,0,0,0,0],[0,1,0,0,0,1,1,0],
+      [0,0,0,1,0,0,0,0],[0,0,0,0,0,0,0,2]
+    ],
+    start: { r: 0, c: 0, dir: 'kanan' } },
+];
+
+const BLOCKS = [
+  { id:'MULAI',  label:'MULAI',            cls:'b-mulai',   icon:'▶️' },
+  { id:'MAJU1',  label:'MAJU 1 LANGKAH',   cls:'b-maju1',   icon:'⬆️', step:1 },
+  { id:'MAJU2',  label:'MAJU 2 LANGKAH',   cls:'b-maju2',   icon:'⬆️', step:2 },
+  { id:'MAJU3',  label:'MAJU 3 LANGKAH',   cls:'b-maju3',   icon:'⬆️', step:3 },
+  { id:'MUNDUR', label:'MUNDUR 1 LANGKAH', cls:'b-mundur',  icon:'⬇️', step:-1 },
+  { id:'KIRI',   label:'BELOK KIRI',       cls:'b-kiri',    icon:'↰' },
+  { id:'KANAN',  label:'BELOK KANAN',      cls:'b-kanan',   icon:'↱' },
+  { id:'AMBIL',  label:'AMBIL BENDA',      cls:'b-ambil',   icon:'✋' },
+  { id:'SELESAI',label:'SELESAI',          cls:'b-selesai', icon:'🏁' },
+];
+
+/* ============================================================
+   STATE GAME
+   ============================================================ */
+let program = [];
+let robot = { r:0, c:0, dir:'kanan' };
+let running = false;
+let currentLevel = 0;
+let arenaGrid = [];
+let levelStart = { r:0, c:0, dir:'kanan' };
+let attempts = 0;
+let levelScores = {};
+let completedLevels = [];
+let gameInitialized = false;
+
+function calculatePoints(a) {
+  if (a <= 1) return 100;
+  if (a <= 3) return 90;
+  if (a <= 5) return 85;
+  return 80;
+}
+
+/* ============================================================
+   INIT GAME
+   ============================================================ */
+function initGame() {
+  if (gameInitialized) return;
+  gameInitialized = true;
+
+  const blockList = document.getElementById('blockList');
+  BLOCKS.forEach(b => {
+    const btn = document.createElement('button');
+    btn.className = 'block-btn ' + b.cls;
+    btn.innerHTML = `<span>${b.icon}</span><span>${b.label}</span>`;
+    btn.onclick = () => addBlock(b.id);
+    blockList.appendChild(btn);
+  });
+
+  document.getElementById('btnRun').onclick   = runProgram;
+  document.getElementById('btnClear').onclick = () => {
+    program = []; renderWorkspace(); resetRobot(); clearAllHighlights();
+    setStatus('idle','Siap. Susun instruksi lalu tekan Jalankan. (Percobaan: ' + attempts + ')');
+  };
+  document.getElementById('btnReset').onclick = () => {
+    resetRobot(); clearAllHighlights();
+    setStatus('idle','Arena direset. Program tetap. (Percobaan: ' + attempts + ')');
+  };
+
+  loadLevel(0);
+}
+
+const levelBar = document.getElementById('levelBar');
+function renderLevelBar() {
+  levelBar.innerHTML = '';
+  LEVELS.forEach((lv, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'level-btn';
+    btn.textContent = i + 1;
+    btn.title = lv.name;
+    if (completedLevels.includes(i)) btn.classList.add('completed');
+    if (i === currentLevel) btn.classList.add('active');
+    const unlocked = i === 0 || completedLevels.includes(i) || completedLevels.includes(i - 1);
+    if (unlocked) btn.onclick = () => loadLevel(i);
+    else { btn.classList.add('locked'); btn.onclick = () => alert('🔒 Selesaikan level sebelumnya dulu ya!'); }
+    levelBar.appendChild(btn);
+  });
+}
+
+function loadLevel(idx) {
+  currentLevel = idx;
+  const lv = LEVELS[idx];
+  program = [];
+  renderWorkspace();
+  arenaGrid = lv.arena.map(row => [...row]);
+  levelStart = { ...lv.start };
+  robot = { ...levelStart };
+  attempts = 0;
+  document.getElementById('missionTitle').textContent = '🎯 Misi ' + lv.name;
+  document.getElementById('missionGoal').textContent = lv.goal;
+  document.getElementById('missionDo').textContent = lv.do;
+  document.getElementById('missionAvoid').textContent = lv.avoid;
+  document.getElementById('levelLabel').textContent = lv.name;
+  document.getElementById('arena').style.gridTemplateColumns = `repeat(${lv.cols}, 1fr)`;
+  updateStats();
+  renderLevelBar();
+  renderArena();
+  setStatus('idle', '🆕 ' + lv.name + '. Baca instruksi, lalu susun program.');
+}
+
+function updateStats() {
+  document.getElementById('statAttempts').textContent = attempts;
+  const pts = levelScores[currentLevel];
+  document.getElementById('statPoints').textContent = (pts !== undefined) ? pts : '–';
+  const total = Object.values(levelScores).reduce((a,b) => a+b, 0);
+  document.getElementById('statTotal').textContent = total;
+}
+
+function addBlock(id) {
+  if (program.length >= 25) { alert('Maksimal 25 instruksi.'); return; }
+  program.push(id);
+  renderWorkspace();
+}
+function removeBlock(i) { program.splice(i, 1); renderWorkspace(); }
+function moveBlock(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= program.length) return;
+  [program[i], program[j]] = [program[j], program[i]];
+  renderWorkspace();
+}
+
+const workspace = document.getElementById('workspace');
+function renderWorkspace() {
+  workspace.innerHTML = '';
+  program.forEach((id, i) => {
+    const b = BLOCKS.find(x => x.id === id);
+    const div = document.createElement('div');
+    div.className = 'item ' + b.cls;
+    div.draggable = true;
+    div.dataset.index = i;
+    div.innerHTML = `
+      <span class="num">${i+1}</span>
+      <span>${b.icon}</span>
+      <span>${b.label}</span>
+      <span class="actions">
+        <button onclick="moveBlock(${i},-1)">▲</button>
+        <button onclick="moveBlock(${i},1)">▼</button>
+        <button onclick="removeBlock(${i})">✕</button>
+      </span>
+    `;
+    div.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', i);
+      div.classList.add('dragging');
+    });
+    div.addEventListener('dragend', () => div.classList.remove('dragging'));
+    div.addEventListener('dragover', e => { e.preventDefault(); div.classList.add('drag-over'); });
+    div.addEventListener('dragleave', () => div.classList.remove('drag-over'));
+    div.addEventListener('drop', e => {
+      e.preventDefault();
+      div.classList.remove('drag-over');
+      const from = +e.dataTransfer.getData('text/plain');
+      const to = i;
+      if (from === to) return;
+      const [item] = program.splice(from, 1);
+      program.splice(to, 0, item);
+      renderWorkspace();
+    });
+    workspace.appendChild(div);
+  });
+  renderPseudo();
+}
+
+function renderPseudo() {
+  let text = '';
+  program.forEach(id => {
+    const b = BLOCKS.find(x => x.id === id);
+    text += b.label + '\n';
+  });
+  if (!text) text = '(belum ada instruksi)';
+  document.getElementById('pseudoPreview').textContent = text;
+}
+
+function renderArena(currentIdx = -1, crashPos = null) {
+  const lv = LEVELS[currentLevel];
+  const arena = document.getElementById('arena');
+  arena.style.gridTemplateColumns = `repeat(${lv.cols}, 1fr)`;
+  arena.innerHTML = '';
+  for (let r = 0; r < lv.rows; r++) {
+    for (let c = 0; c < lv.cols; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      const v = arenaGrid[r][c];
+      if (v === 1) cell.classList.add('wall');
+      if (v === 2) { cell.classList.add('goal'); cell.textContent = '🚩'; }
+      if (v === 3) { cell.classList.add('item'); cell.textContent = '📦'; }
+      if (r === robot.r && c === robot.c) {
+        cell.classList.add('robot');
+        cell.textContent = dirEmoji(robot.dir);
+      }
+      if (currentIdx >= 0 && r === robot.r && c === robot.c) cell.classList.add('current');
+      if (crashPos && crashPos.r === r && crashPos.c === c) cell.classList.add('crash');
+      arena.appendChild(cell);
+    }
+  }
+}
+
+function dirEmoji(d) {
+  return d === 'kanan' ? '➡️' : d === 'kiri' ? '⬅️' : d === 'atas' ? '⬆️' : '⬇️';
+}
+
+function resetRobot() {
+  robot = { ...levelStart };
+  arenaGrid = LEVELS[currentLevel].arena.map(row => [...row]);
+  renderArena();
+}
+
+function rotate(dir, arah) {
+  const order = ['kanan','bawah','kiri','atas'];
+  let i = order.indexOf(dir);
+  i = arah === 'kiri' ? (i + 3) % 4 : (i + 1) % 4;
+  return order[i];
+}
+
+function moveRobot(step) {
+  const lv = LEVELS[currentLevel];
+  const delta = {
+    kanan: { r: 0, c: 1 }, kiri: { r: 0, c: -1 },
+    atas: { r: -1, c: 0 }, bawah: { r: 1, c: 0 },
+  }[robot.dir];
+  for (let s = 0; s < Math.abs(step); s++) {
+    const nr = robot.r + delta.r * Math.sign(step);
+    const nc = robot.c + delta.c * Math.sign(step);
+    if (nr < 0 || nr >= lv.rows || nc < 0 || nc >= lv.cols)
+      return { status: 'keluar', crash: { r: nr, c: nc } };
+    if (arenaGrid[nr][nc] === 1)
+      return { status: 'tabrak', crash: { r: nr, c: nc } };
+    robot.r = nr; robot.c = nc;
+  }
+  return { status: 'ok' };
+}
+
+function isLevelComplete() {
+  if (arenaGrid[robot.r][robot.c] !== 2) return false;
+  for (let r = 0; r < LEVELS[currentLevel].rows; r++)
+    for (let c = 0; c < LEVELS[currentLevel].cols; c++)
+      if (arenaGrid[r][c] === 3) return false;
+  return true;
+}
+
+function highlightRunning(i) {
+  clearHighlightStates();
+  const el = document.querySelector(`.item[data-index="${i}"]`);
+  if (el) el.classList.add('running');
+}
+function highlightError(i) {
+  const el = document.querySelector(`.item[data-index="${i}"]`);
+  if (el) {
+    el.classList.remove('running');
+    el.classList.add('error');
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+function markPassed(upto) {
+  document.querySelectorAll('.item').forEach((el, idx) => {
+    el.classList.remove('running', 'error');
+    if (idx < upto) el.classList.add('passed');
+  });
+}
+function clearHighlightStates() {
+  document.querySelectorAll('.item').forEach(el => el.classList.remove('running', 'error', 'passed'));
+}
+function clearAllHighlights() {
+  document.querySelectorAll('.item').forEach(el => el.classList.remove('running', 'error', 'passed'));
+}
+
+async function runProgram() {
+  if (running) return;
+  if (program.length === 0) { setStatus('fail', '❌ Program kosong.'); return; }
+
+  const alreadyCompleted = completedLevels.includes(currentLevel);
+  if (!alreadyCompleted) { attempts++; updateStats(); }
+
+  running = true;
+  document.getElementById('btnRun').disabled = true;
+  resetRobot();
+  clearAllHighlights();
+  setStatus('running', '⏳ Menjalankan… (percobaan ke-' + attempts + ')');
+
+  let errorMsg = '', stopped = false;
+
+  for (let i = 0; i < program.length; i++) {
+    const id = program[i];
+    const b = BLOCKS.find(x => x.id === id);
+    markPassed(i);
+    highlightRunning(i);
+    await sleep(500);
+    let res = { status: 'ok' };
+
+    if (id.startsWith('MAJU')) res = moveRobot(b.step);
+    else if (id === 'MUNDUR') res = moveRobot(-1);
+    else if (id === 'KIRI') robot.dir = rotate(robot.dir, 'kiri');
+    else if (id === 'KANAN') robot.dir = rotate(robot.dir, 'kanan');
+    else if (id === 'AMBIL') {
+      if (arenaGrid[robot.r][robot.c] === 3) arenaGrid[robot.r][robot.c] = 0;
+      else res = { status: 'kosong' };
+    }
+
+    renderArena(i, res.crash);
+
+    if (res.status === 'tabrak') { errorMsg = 'Robot menabrak dinding!'; stopped = true; highlightError(i); renderArena(-1, res.crash); break; }
+    if (res.status === 'keluar') { errorMsg = 'Robot keluar dari arena!'; stopped = true; highlightError(i); renderArena(-1, res.crash); break; }
+    if (res.status === 'kosong') { errorMsg = 'AMBIL BENDA dijalankan, tapi tidak ada benda.'; stopped = true; highlightError(i); break; }
+
+    await sleep(300);
+  }
+
+  if (!stopped && !isLevelComplete()) {
+    highlightError(program.length - 1);
+  } else if (!stopped) {
+    clearAllHighlights();
+  }
+
+  running = false;
+  document.getElementById('btnRun').disabled = false;
+  const complete = isLevelComplete();
+
+  if (stopped) {
+    setStatus('fail', '❌ ' + errorMsg + ' Lihat blok merah! (Percobaan ke-' + attempts + ')');
+  } else if (complete) {
+    if (alreadyCompleted) {
+      setStatus('success', '🎉 Berhasil lagi! Level ini sudah pernah selesai.');
+    } else {
+      const points = calculatePoints(attempts);
+      levelScores[currentLevel] = points;
+      completedLevels.push(currentLevel);
+      updateStats();
+      renderLevelBar();
+      setStatus('success', '🎉 Berhasil! Dapat ' + points + ' poin.');
+      onLevelComplete(points);
+    }
+  } else {
+    const robotDiBendera = arenaGrid[robot.r][robot.c] === 2;
+    if (robotDiBendera) setStatus('fail', '❌ Kamu di bendera, tapi masih ada benda 📦 yang belum diambil!');
+    else setStatus('fail', '❌ Robot berhenti di (' + robot.r + ',' + robot.c + '), bukan di bendera. Lihat blok merah!');
+  }
+}
+
+function onLevelComplete(points) {
+  const isLast = currentLevel === LEVELS.length - 1;
+  const modalBg = document.getElementById('modalBg');
+  const modalContent = document.getElementById('modalContent');
+  const total = Object.values(levelScores).reduce((a,b) => a+b, 0);
+
+  if (isLast) {
+    kirimNilaiKeServer(total);
+
+    let rows = '';
+    LEVELS.forEach((lv, i) => {
+      const p = levelScores[i] || 0;
+      const stars = p === 100 ? '⭐⭐⭐' : p === 90 ? '⭐⭐' : p === 85 ? '⭐' : '✓';
+      rows += `<tr><td>${i+1}</td><td>${lv.name}</td><td>${p}</td><td>${stars}</td></tr>`;
+    });
+
+    modalContent.innerHTML = `
+      <h2>🏆 Selamat!</h2>
+      <p>Kamu menyelesaikan <strong>semua 5 level</strong>!</p>
+      <div class="big-score">${total}</div>
+      <p style="font-size:11px;">dari total maksimal 500 poin</p>
+      <table class="score-table">
+        <thead><tr><th>#</th><th>Level</th><th>Poin</th><th>Bintang</th></tr></thead>
+        <tbody>${rows}<tr class="total"><td colspan="2">TOTAL</td><td>${total}</td><td></td></tr></tbody>
+      </table>
+      <div id="sendStatus" style="font-size:12px;color:#64748b;margin-bottom:8px;">⏳ Mengirim nilai ke guru…</div>
+      <button id="modalDone" style="background:#10b981;">✅ Selesai & Keluar</button>
+      <button id="modalRestart" style="background:#e2e8f0;color:#475569;margin-left:6px;">🔄 Ulangi</button>
+    `;
+    setTimeout(() => {
+      document.getElementById('modalDone').onclick = () => {
+        modalBg.classList.remove('show');
+        logout();
+      };
+      document.getElementById('modalRestart').onclick = () => {
+        levelScores = {};
+        completedLevels = [];
+        modalBg.classList.remove('show');
+        loadLevel(0);
+      };
+    }, 0);
+  } else {
+    const stars = points === 100 ? '⭐⭐⭐' : points === 90 ? '⭐⭐' : points === 85 ? '⭐' : '✓';
+    modalContent.innerHTML = `
+      <h2>🎉 Level Selesai!</h2>
+      <div class="big-score">+${points}</div>
+      <div style="font-size:24px;margin-bottom:8px;">${stars}</div>
+      <div class="score-detail">
+        <strong>Percobaan:</strong> ${attempts}×<br>
+        <strong>Poin level ini:</strong> ${points}<br>
+        <strong>Total sementara:</strong> ${total}
+      </div>
+      <button id="modalNext">Lanjut ke Level ${currentLevel + 2} →</button>
+    `;
+    setTimeout(() => {
+      document.getElementById('modalNext').onclick = () => {
+        modalBg.classList.remove('show');
+        loadLevel(currentLevel + 1);
+      };
+    }, 0);
+  }
+  modalBg.classList.add('show');
+}
+
+async function kirimNilaiKeServer(total) {
+  if (!SISWA) return;
+  const scores = [0,1,2,3,4].map(i => levelScores[i] || 0);
+  const payload = {
+    action: 'simpanNilai',
+    nama: SISWA.nama,
+    kelas: SISWA.kelas,
+    scores: scores,
+    total: total
+  };
+
+  try {
+    await fetch(API_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    });
+    const el = document.getElementById('sendStatus');
+    if (el) {
+      el.innerHTML = '✅ Nilai sudah terkirim ke guru!';
+      el.style.color = '#10b981';
+    }
+  } catch (err) {
+    const el = document.getElementById('sendStatus');
+    if (el) {
+      el.innerHTML = '⚠️ Gagal kirim otomatis. Screenshot nilai ini & kirim ke guru.';
+      el.style.color = '#dc2626';
+    }
+  }
+}
+
+function setStatus(type, msg) {
+  const el = document.getElementById('status');
+  if (!el) return;
+  el.className = 'status ' + type;
+  el.textContent = msg;
+}
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+/* ============================================================
+   DASHBOARD GURU
+   ============================================================ */
+let allData = [];
+
+async function loadDataGuru() {
+  const area = document.getElementById('tableArea');
+  area.innerHTML = '<div class="loading"><div class="spinner"></div><div>Memuat data…</div></div>';
+
+  try {
+    const res = await fetch(API_URL + '?action=listNilai');
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.msg || 'Gagal memuat');
+    allData = data.data || [];
+    updateStatsGuru();
+    renderTableGuru(allData);
+  } catch (err) {
+    area.innerHTML = '<div class="empty">❌ Gagal memuat data: ' + err.message + '</div>';
+  }
+}
+
+function updateStatsGuru() {
+  const totals = allData.map(d => Number(d.total) || 0).filter(t => t > 0);
+  document.getElementById('statSiswa').textContent = allData.length;
+  if (totals.length === 0) {
+    document.getElementById('statRata').textContent = '–';
+    document.getElementById('statMax').textContent = '–';
+    document.getElementById('statMin').textContent = '–';
+    return;
+  }
+  const rata = Math.round(totals.reduce((a,b) => a+b, 0) / totals.length);
+  document.getElementById('statRata').textContent = rata;
+  document.getElementById('statMax').textContent = Math.max(...totals);
+  document.getElementById('statMin').textContent = Math.min(...totals);
+}
+
+function renderTableGuru(data) {
+  const area = document.getElementById('tableArea');
+  if (data.length === 0) {
+    area.innerHTML = '<div class="empty">📭 Belum ada siswa yang mengerjakan.<br>Bagikan link ke siswa untuk mulai belajar!</div>';
+    return;
+  }
+
+  let html = `
+    <div class="table-wrap">
+      <table class="dash-table">
+        <thead>
+          <tr>
+            <th>#</th><th>Nama</th><th>Kelas</th>
+            <th>L1</th><th>L2</th><th>L3</th><th>L4</th><th>L5</th>
+            <th>Total</th><th>Status</th><th>Waktu</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  data.forEach((d, i) => {
+    const total = Number(d.total) || 0;
+    let status = '<span class="badge badge-fail">Belum</span>';
+    if (total >= 450) status = '<span class="badge badge-success">Sangat Baik</span>';
+    else if (total >= 350) status = '<span class="badge badge-success">Baik</span>';
+    else if (total >= 200) status = '<span class="badge badge-warn">Cukup</span>';
+
+    const waktu = d.timestamp ? new Date(d.timestamp).toLocaleString('id-ID', {
+      day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+    }) : '–';
+
+    html += `
+      <tr>
+        <td>${i+1}</td>
+        <td><strong>${d.nama}</strong></td>
+        <td>${d.kelas}</td>
+        <td>${d.level_1 || 0}</td>
+        <td>${d.level_2 || 0}</td>
+        <td>${d.level_3 || 0}</td>
+        <td>${d.level_4 || 0}</td>
+        <td>${d.level_5 || 0}</td>
+        <td><strong>${total}</strong></td>
+        <td>${status}</td>
+        <td>${waktu}</td>
+      </tr>
+    `;
+  });
+
+  html += '</tbody></table></div>';
+  area.innerHTML = html;
+}
+
+function filterTable() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  if (!q) { renderTableGuru(allData); return; }
+  const filtered = allData.filter(d =>
+    String(d.nama).toLowerCase().includes(q) ||
+    String(d.kelas).toLowerCase().includes(q)
+  );
+  renderTableGuru(filtered);
+}
+
+/* ============================================================
+   AUTO-LOGIN
+   ============================================================ */
+window.addEventListener('DOMContentLoaded', () => {
+  const role = sessionStorage.getItem('role');
+  const siswaStr = sessionStorage.getItem('siswa');
+  const guruStr = sessionStorage.getItem('guru');
+
+  if (role === 'siswa' && siswaStr) {
+    try {
+      SISWA = JSON.parse(siswaStr);
+      const sub = document.getElementById('gameSubtitle');
+      sub.innerHTML = '👋 Halo, <strong>' + SISWA.nama + '</strong> (' + SISWA.kelas + ') — Susun Instruksi, Jalankan Aksi!';
+      showPage('game');
+      initGame();
+      return;
+    } catch(e) {}
+  }
+
+  if (role === 'guru' && guruStr) {
+    showPage('guru');
+    loadDataGuru();
+    return;
+  }
+
+  showPage('login');
+});
+</script>
+</body>
+</html>
